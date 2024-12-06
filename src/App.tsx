@@ -5,9 +5,23 @@ import Heading from './Heading'
 import Editor from './Editor'
 import { HeadingSize } from './types'
 
+const defaultBaseObject = `{
+  "field1": 1,
+  "field2": {
+    "nestedField1": "value",
+    "nestedField2": null
+  }
+}
+`
+
+const defaultFields = `[
+  ["field1", [1, 2, null]],
+  ["field2.nestedField1", ["value", "someOtherValue"]]
+]`
+
 const App: React.FC = () => {
-  const [baseObject, setBaseObject] = useState<string>('')
-  const [fields, setFields] = useState<string>('')
+  const [baseObject, setBaseObject] = useState<string>(defaultBaseObject)
+  const [fields, setFields] = useState<string>(defaultFields)
   const [output, setOutput] = useState<string>('')
 
   const setValueAtPath = (obj: any, path: string, value: any) => {
