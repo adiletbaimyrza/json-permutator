@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { SetStateAction, useState } from 'react'
+import * as XLSX from 'xlsx'
 import styled from 'styled-components'
 import Heading from './Heading'
 import Editor from './Editor'
@@ -99,6 +100,47 @@ const App: React.FC = () => {
     }
   }
 
+  const exportToExcel = () => {
+    try {
+      const parsedBaseObject = JSON.parse(baseObject)
+
+      try {
+        const parsedFields = JSON.parse(fields)
+
+        const permutations = generatePermutations(
+          parsedBaseObject,
+          parsedFields
+        )
+
+        // Flatten the permutations and prepare for Excel export
+        const flattenedData = permutations.map(({ case: caseObject }) => {
+          // Replace null values with "MISSING"
+          const updatedCaseObject = Object.fromEntries(
+            Object.entries(caseObject).map(([key, value]) => [
+              key,
+              value === null ? 'MISSING' : value,
+            ])
+          )
+          return updatedCaseObject
+        })
+
+        // Create a worksheet and a workbook
+        const ws = XLSX.utils.json_to_sheet(flattenedData)
+        const wb = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(wb, ws, 'Permutations')
+
+        // Export the workbook as an Excel file
+        XLSX.writeFile(wb, 'permutations.xlsx')
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        alert('Invalid JSON input in "fields". Please check your data.')
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      alert('Invalid JSON input in "baseObject". Please check your data.')
+    }
+  }
+
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       <Heading size={HeadingSize.S}>JSON Permutator</Heading>
@@ -126,6 +168,7 @@ const App: React.FC = () => {
           onChange={(newValue) => setOutput(newValue as SetStateAction<string>)}
         />
       )}
+      <Button onClick={exportToExcel}>Export to Excel</Button>
     </div>
   )
 }
@@ -139,6 +182,7 @@ const StyledButton = styled.button<{ padding?: string; marginTop?: string }>`
   cursor: pointer;
   font-size: 1rem;
   margin-bottom: 1.5rem;
+  margin-right: 1.5rem;
 
   &:hover {
     background-color: var(--button-hover-background);

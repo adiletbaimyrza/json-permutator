@@ -3,6 +3,7 @@
   box-sizing: border-box;
   margin: unset;
   padding: unset;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 /* CSS RESET */
@@ -25,5 +26,5 @@ body,
 body {
   background-color: var(--background-color);
   color: var(--text-color);
-  font-family: 'Arial', sans-serif;
+
 }
