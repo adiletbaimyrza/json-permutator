@@ -10,6 +10,7 @@
 
 :root {
   --background-color: #121212;
+  --background-hover: #2c2c2c;
   --text-color: #e0e0e0;
   --button-background: #3a3a3a;
   --button-hover-background: #575757;
@@ -26,5 +27,10 @@ body,
 body {
   background-color: var(--background-color);
   color: var(--text-color);
+}
 
+#root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

@@ -2,9 +2,8 @@
 import React, { SetStateAction, useState } from 'react'
 import * as XLSX from 'xlsx'
 import styled from 'styled-components'
-import Heading from './Heading'
 import Editor from './Editor'
-import { HeadingSize } from './types'
+import Navbar from './Navbar'
 
 const defaultBaseObject = `{
   "field1": 1,
@@ -21,9 +20,11 @@ const defaultFields = `[
 ]`
 
 const App: React.FC = () => {
-  const [baseObject, setBaseObject] = useState<string>(defaultBaseObject)
+  const [payload, setBaseObject] = useState<string>(defaultBaseObject)
   const [fields, setFields] = useState<string>(defaultFields)
   const [output, setOutput] = useState<string>('')
+  const [isPayloadVisible, setIsPayloadVisible] = useState<boolean>(true)
+  const [isFieldsVisible, setIsFieldsVisible] = useState<boolean>(true)
 
   const setValueAtPath = (obj: any, path: string, value: any) => {
     const keys = path.split('.')
@@ -45,7 +46,7 @@ const App: React.FC = () => {
     return caseObject
   }
 
-  const generatePermutations = (baseObject: any, fields: [string, any[]][]) => {
+  const generatePermutations = (payload: any, fields: [string, any[]][]) => {
     const results: any[] = []
 
     const backtrack = (current: any, index: number) => {
@@ -73,13 +74,13 @@ const App: React.FC = () => {
       }
     }
 
-    backtrack(baseObject, 0)
+    backtrack(payload, 0)
     return results
   }
 
   const handleGenerate = () => {
     try {
-      const parsedBaseObject = JSON.parse(baseObject)
+      const parsedBaseObject = JSON.parse(payload)
 
       try {
         const parsedFields = JSON.parse(fields)
@@ -96,13 +97,13 @@ const App: React.FC = () => {
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      alert('Invalid JSON input in "baseObject". Please check your data.')
+      alert('Invalid JSON input in "payload". Please check your data.')
     }
   }
 
   const exportToExcel = () => {
     try {
-      const parsedBaseObject = JSON.parse(baseObject)
+      const parsedBaseObject = JSON.parse(payload)
 
       try {
         const parsedFields = JSON.parse(fields)
@@ -137,30 +138,32 @@ const App: React.FC = () => {
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      alert('Invalid JSON input in "baseObject". Please check your data.')
+      alert('Invalid JSON input in "payload". Please check your data.')
     }
   }
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <Heading size={HeadingSize.S}>JSON Permutator</Heading>
-
-      <Editor
-        heading="Base Object"
-        value={baseObject}
-        onChange={(newValue) =>
-          setBaseObject(newValue as SetStateAction<string>)
-        }
+    <>
+      <Navbar
+        isPayloadVisible={isPayloadVisible}
+        setIsPayloadVisible={setIsPayloadVisible}
       />
+      {isPayloadVisible && (
+        <Editor
+          heading="Payload"
+          value={payload}
+          onChange={(newValue) =>
+            setBaseObject(newValue as SetStateAction<string>)
+          }
+        />
+      )}
 
       <Editor
         heading="Fields"
         value={fields}
         onChange={(newValue) => setFields(newValue as SetStateAction<string>)}
       />
-
       <Button onClick={handleGenerate}>Generate Permutations</Button>
-
       {output && (
         <Editor
           heading="Output"
@@ -169,7 +172,7 @@ const App: React.FC = () => {
         />
       )}
       <Button onClick={exportToExcel}>Export to Excel</Button>
-    </div>
+    </>
   )
 }
 
