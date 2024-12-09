@@ -29,7 +29,9 @@ const Nav = styled.nav`
   align-items: center;
   background: var(--button-background);
   padding: 0.5rem;
+  margin-top: 1rem;
   margin-bottom: 1rem;
+  border-radius: 0.25rem;
 
   & > *:not(:last-child) {
     margin-right: 1rem;
