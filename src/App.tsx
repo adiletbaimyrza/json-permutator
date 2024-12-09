@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { SetStateAction, useState } from 'react'
 import * as XLSX from 'xlsx'
 import styled from 'styled-components'
@@ -11,8 +10,7 @@ const defaultBaseObject = `{
     "nestedField1": "value",
     "nestedField2": null
   }
-}
-`
+}`
 
 const defaultFields = `[
   ["field1", [1, 2, null]],
@@ -91,11 +89,9 @@ const App: React.FC = () => {
         )
 
         setOutput(JSON.stringify(permutations, null, 2))
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         alert('Invalid JSON input in "fields". Please check your data.')
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       alert('Invalid JSON input in "payload". Please check your data.')
     }
@@ -113,9 +109,7 @@ const App: React.FC = () => {
           parsedFields
         )
 
-        // Flatten the permutations and prepare for Excel export
         const flattenedData = permutations.map(({ case: caseObject }) => {
-          // Replace null values with "MISSING"
           const updatedCaseObject = Object.fromEntries(
             Object.entries(caseObject).map(([key, value]) => [
               key,
@@ -125,18 +119,14 @@ const App: React.FC = () => {
           return updatedCaseObject
         })
 
-        // Create a worksheet and a workbook
         const ws = XLSX.utils.json_to_sheet(flattenedData)
         const wb = XLSX.utils.book_new()
         XLSX.utils.book_append_sheet(wb, ws, 'Permutations')
 
-        // Export the workbook as an Excel file
         XLSX.writeFile(wb, 'permutations.xlsx')
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         alert('Invalid JSON input in "fields". Please check your data.')
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       alert('Invalid JSON input in "payload". Please check your data.')
     }
@@ -147,6 +137,8 @@ const App: React.FC = () => {
       <Navbar
         isPayloadVisible={isPayloadVisible}
         setIsPayloadVisible={setIsPayloadVisible}
+        isFieldsVisible={isFieldsVisible}
+        setIsFieldsVisible={setIsFieldsVisible}
       />
       {isPayloadVisible && (
         <Editor
@@ -157,12 +149,13 @@ const App: React.FC = () => {
           }
         />
       )}
-
-      <Editor
-        heading="Fields"
-        value={fields}
-        onChange={(newValue) => setFields(newValue as SetStateAction<string>)}
-      />
+      {isFieldsVisible && (
+        <Editor
+          heading="Fields"
+          value={fields}
+          onChange={(newValue) => setFields(newValue as SetStateAction<string>)}
+        />
+      )}
       <Button onClick={handleGenerate}>Generate Permutations</Button>
       {output && (
         <Editor
