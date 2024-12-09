@@ -5,11 +5,13 @@ const Navbar: React.FC<{
   setIsPayloadVisible: React.Dispatch<React.SetStateAction<boolean>>
   isFieldsVisible: boolean
   setIsFieldsVisible: React.Dispatch<React.SetStateAction<boolean>>
+  handleGenerate: () => void
 }> = ({
   isPayloadVisible,
   setIsPayloadVisible,
   isFieldsVisible,
   setIsFieldsVisible,
+  handleGenerate,
 }) => {
   return (
     <Nav>
@@ -20,11 +22,13 @@ const Navbar: React.FC<{
       <Button onClick={() => setIsFieldsVisible(!isFieldsVisible)}>
         {isFieldsVisible ? 'Hide Fields' : 'Show Fields'}
       </Button>
+      <Button onClick={handleGenerate}>Generate Permutations</Button>
     </Nav>
   )
 }
 
 const Nav = styled.nav`
+  position: fixed;
   display: flex;
   align-items: center;
   background: var(--button-background);
@@ -32,6 +36,9 @@ const Nav = styled.nav`
   margin-top: 1rem;
   margin-bottom: 1rem;
   border-radius: 0.25rem;
+  z-index: 10;
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); /* Bigger shadow */
 
   & > *:not(:last-child) {
     margin-right: 1rem;

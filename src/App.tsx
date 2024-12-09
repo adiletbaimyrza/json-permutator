@@ -1,8 +1,9 @@
 import React, { SetStateAction, useState } from 'react'
-import * as XLSX from 'xlsx'
+import { v4 as uuidv4 } from 'uuid'
 import styled from 'styled-components'
 import Editor from './Editor'
 import Navbar from './Navbar'
+import PermutationList from './PermutationList'
 
 const defaultBaseObject = `{
   "field1": 1,
@@ -23,6 +24,7 @@ const App: React.FC = () => {
   const [output, setOutput] = useState<string>('')
   const [isPayloadVisible, setIsPayloadVisible] = useState<boolean>(true)
   const [isFieldsVisible, setIsFieldsVisible] = useState<boolean>(true)
+  const [permutations, setPermutations] = useState<any[]>([])
 
   const setValueAtPath = (obj: any, path: string, value: any) => {
     const keys = path.split('.')
@@ -51,7 +53,8 @@ const App: React.FC = () => {
       if (index === fields.length) {
         const caseObject = createCaseObject(fields, current)
         results.push({
-          case: caseObject,
+          id: uuidv4(),
+          caseData: caseObject,
           permutation: JSON.parse(JSON.stringify(current)),
         })
         return
@@ -83,47 +86,12 @@ const App: React.FC = () => {
       try {
         const parsedFields = JSON.parse(fields)
 
-        const permutations = generatePermutations(
+        const generatedPermutations = generatePermutations(
           parsedBaseObject,
           parsedFields
         )
 
-        setOutput(JSON.stringify(permutations, null, 2))
-      } catch (error) {
-        alert('Invalid JSON input in "fields". Please check your data.')
-      }
-    } catch (error) {
-      alert('Invalid JSON input in "payload". Please check your data.')
-    }
-  }
-
-  const exportToExcel = () => {
-    try {
-      const parsedBaseObject = JSON.parse(payload)
-
-      try {
-        const parsedFields = JSON.parse(fields)
-
-        const permutations = generatePermutations(
-          parsedBaseObject,
-          parsedFields
-        )
-
-        const flattenedData = permutations.map(({ case: caseObject }) => {
-          const updatedCaseObject = Object.fromEntries(
-            Object.entries(caseObject).map(([key, value]) => [
-              key,
-              value === null ? 'MISSING' : value,
-            ])
-          )
-          return updatedCaseObject
-        })
-
-        const ws = XLSX.utils.json_to_sheet(flattenedData)
-        const wb = XLSX.utils.book_new()
-        XLSX.utils.book_append_sheet(wb, ws, 'Permutations')
-
-        XLSX.writeFile(wb, 'permutations.xlsx')
+        setPermutations(generatedPermutations)
       } catch (error) {
         alert('Invalid JSON input in "fields". Please check your data.')
       }
@@ -139,51 +107,48 @@ const App: React.FC = () => {
         setIsPayloadVisible={setIsPayloadVisible}
         isFieldsVisible={isFieldsVisible}
         setIsFieldsVisible={setIsFieldsVisible}
+        handleGenerate={handleGenerate}
       />
-      {isPayloadVisible && (
-        <Editor
-          heading="Payload"
-          value={payload}
-          onChange={(newValue) =>
-            setBaseObject(newValue as SetStateAction<string>)
-          }
+      <Main>
+        {isPayloadVisible && (
+          <Editor
+            heading="Payload"
+            value={payload}
+            onChange={(newValue) =>
+              setBaseObject(newValue as SetStateAction<string>)
+            }
+          />
+        )}
+        {isFieldsVisible && (
+          <Editor
+            heading="Fields"
+            value={fields}
+            onChange={(newValue) =>
+              setFields(newValue as SetStateAction<string>)
+            }
+          />
+        )}
+
+        <PermutationList
+          permutations={permutations}
+          setPermutations={setPermutations}
         />
-      )}
-      {isFieldsVisible && (
-        <Editor
-          heading="Fields"
-          value={fields}
-          onChange={(newValue) => setFields(newValue as SetStateAction<string>)}
-        />
-      )}
-      <Button onClick={handleGenerate}>Generate Permutations</Button>
-      {output && (
-        <Editor
-          heading="Output"
-          value={output}
-          onChange={(newValue) => setOutput(newValue as SetStateAction<string>)}
-        />
-      )}
-      <Button onClick={exportToExcel}>Export to Excel</Button>
+        {output && (
+          <Editor
+            heading="Output"
+            value={output}
+            onChange={(newValue) =>
+              setOutput(newValue as SetStateAction<string>)
+            }
+          />
+        )}
+      </Main>
     </>
   )
 }
 
-const StyledButton = styled.button<{ padding?: string; marginTop?: string }>`
-  background-color: var(--button-background);
-  color: var(--button-text-color);
-  border: none;
-  border-radius: 0.25rem;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-bottom: 1.5rem;
-  margin-right: 1.5rem;
-
-  &:hover {
-    background-color: var(--button-hover-background);
-  }
+const Main = styled.main`
+  margin-top: 120px;
 `
-const Button = StyledButton
 
 export default App
