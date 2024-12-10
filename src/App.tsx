@@ -67,7 +67,11 @@ const App: React.FC = () => {
             path: currentPath,
             value: modValue,
           })
-        } else if (origValue !== undefined && modValue === undefined) {
+        } else if (
+          origValue !== undefined &&
+          origValue !== null &&
+          (modValue === undefined || modValue === null)
+        ) {
           mutations.push({
             op: 'remove',
             path: currentPath,
