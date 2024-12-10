@@ -21,10 +21,12 @@ const defaultFields = `[
 const App: React.FC = () => {
   const [payload, setBaseObject] = useState<string>(defaultBaseObject)
   const [fields, setFields] = useState<string>(defaultFields)
-  const [output, setOutput] = useState<string>('')
+  const [mutationBase, setMutationBase] = useState<string>('')
   const [isPayloadVisible, setIsPayloadVisible] = useState<boolean>(true)
   const [isFieldsVisible, setIsFieldsVisible] = useState<boolean>(true)
   const [permutations, setPermutations] = useState<any[]>([])
+  const [isMutationBaseVisible, setIsMutationBaseVisible] =
+    useState<boolean>(true)
 
   const setValueAtPath = (obj: any, path: string, value: any) => {
     const keys = path.split('.')
@@ -46,16 +48,76 @@ const App: React.FC = () => {
     return caseObject
   }
 
-  const generatePermutations = (payload: any, fields: [string, any[]][]) => {
+  const generateMutations = (original: any, modified: any) => {
+    const mutations: any[] = []
+
+    const compareObjects = (orig: any, mod: any, path: string = '') => {
+      const origKeys = Object.keys(orig || {})
+      const modKeys = Object.keys(mod || {})
+      const allKeys = new Set([...origKeys, ...modKeys])
+
+      allKeys.forEach((key) => {
+        const currentPath = path ? `${path}/${key}` : `/${key}`
+        const origValue = orig?.[key]
+        const modValue = mod?.[key]
+
+        if (origValue === undefined && modValue !== undefined) {
+          mutations.push({
+            op: 'add',
+            path: currentPath,
+            value: modValue,
+          })
+        } else if (origValue !== undefined && modValue === undefined) {
+          mutations.push({
+            op: 'remove',
+            path: currentPath,
+          })
+        } else if (
+          origValue !== modValue &&
+          typeof origValue !== 'object' &&
+          typeof modValue !== 'object'
+        ) {
+          mutations.push({
+            op: 'replace',
+            path: currentPath,
+            value: modValue,
+          })
+        } else if (
+          typeof origValue === 'object' &&
+          typeof modValue === 'object'
+        ) {
+          compareObjects(origValue, modValue, currentPath)
+        }
+      })
+    }
+
+    compareObjects(original, modified)
+    return mutations
+  }
+
+  const generatePermutationsWithMutations = (
+    originalPayload: any,
+    fields: [string, any[]][]
+  ) => {
     const results: any[] = []
+
+    const parsedMutationBase = JSON.parse(mutationBase || '{}')
 
     const backtrack = (current: any, index: number) => {
       if (index === fields.length) {
         const caseObject = createCaseObject(fields, current)
+        const mutations = generateMutations(originalPayload, current)
+
+        const mutationBaseWithMutations = {
+          ...parsedMutationBase,
+          mutations,
+        }
+
         results.push({
           id: uuidv4(),
           caseData: caseObject,
           permutation: JSON.parse(JSON.stringify(current)),
+          mutations: mutationBaseWithMutations,
         })
         return
       }
@@ -75,7 +137,7 @@ const App: React.FC = () => {
       }
     }
 
-    backtrack(payload, 0)
+    backtrack(originalPayload, 0)
     return results
   }
 
@@ -86,7 +148,7 @@ const App: React.FC = () => {
       try {
         const parsedFields = JSON.parse(fields)
 
-        const generatedPermutations = generatePermutations(
+        const generatedPermutations = generatePermutationsWithMutations(
           parsedBaseObject,
           parsedFields
         )
@@ -107,6 +169,8 @@ const App: React.FC = () => {
         setIsPayloadVisible={setIsPayloadVisible}
         isFieldsVisible={isFieldsVisible}
         setIsFieldsVisible={setIsFieldsVisible}
+        isMutationBaseVisible={isMutationBaseVisible}
+        setIsMutationBaseVisible={setIsMutationBaseVisible}
         handleGenerate={handleGenerate}
       />
       <Main>
@@ -128,20 +192,20 @@ const App: React.FC = () => {
             }
           />
         )}
+        {isMutationBaseVisible && (
+          <Editor
+            heading="Mutation Base"
+            value={mutationBase}
+            onChange={(newValue) =>
+              setMutationBase(newValue as SetStateAction<string>)
+            }
+          />
+        )}
 
         <PermutationList
           permutations={permutations}
           setPermutations={setPermutations}
         />
-        {output && (
-          <Editor
-            heading="Output"
-            value={output}
-            onChange={(newValue) =>
-              setOutput(newValue as SetStateAction<string>)
-            }
-          />
-        )}
       </Main>
     </>
   )

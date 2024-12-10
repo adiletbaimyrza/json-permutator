@@ -41,7 +41,9 @@ const Editor: React.FC<{
   )
 }
 
-const EditorWrapper = styled.div<{ isFullScreen: boolean }>`
+const EditorWrapper = styled.div.attrs<{ isFullScreen: boolean }>((_) => ({
+  isFullScreen: undefined,
+}))`
   margin-bottom: 1rem;
   ${({ isFullScreen }) =>
     isFullScreen &&

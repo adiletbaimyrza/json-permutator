@@ -8,12 +8,13 @@ const Permutation: React.FC<{
   item: any
   setPermutations: React.Dispatch<React.SetStateAction<any[]>>
 }> = ({ item, setPermutations }) => {
-  const { id, caseData, permutation } = item
-  const [isPermutationVisible, setIsPermutationVisible] =
-    useState<boolean>(false)
+  const { id, caseData, permutation, mutations } = item
+  const [visibleContent, setVisibleContent] = useState<
+    'permutation' | 'mutations' | null
+  >(null)
 
-  const handleToggleVisibility = () => {
-    setIsPermutationVisible((prev) => !prev)
+  const handleToggleContent = (content: 'permutation' | 'mutations') => {
+    setVisibleContent((prev) => (prev === content ? null : content))
   }
 
   const handleDelete = () => {
@@ -36,16 +37,30 @@ const Permutation: React.FC<{
           ))}
         </CaseWrapper>
         <PermutationControls>
-          <PermutationButton onClick={handleToggleVisibility}>
-            {isPermutationVisible ? 'Hide' : 'Show'}
+          <PermutationButton onClick={() => handleToggleContent('permutation')}>
+            {visibleContent === 'permutation'
+              ? 'Hide Permutation'
+              : 'Show Permutation'}
+          </PermutationButton>
+          <PermutationButton onClick={() => handleToggleContent('mutations')}>
+            {visibleContent === 'mutations'
+              ? 'Hide Mutations'
+              : 'Show Mutations'}
           </PermutationButton>
           <PermutationButton onClick={handleDelete}>Delete</PermutationButton>
         </PermutationControls>
       </PermutationHeader>
-      {isPermutationVisible && (
+      {visibleContent === 'permutation' && (
         <Editor
           heading="Permutation"
           value={JSON.stringify(permutation, null, 2)}
+          onChange={() => {}}
+        />
+      )}
+      {visibleContent === 'mutations' && (
+        <Editor
+          heading="Mutations"
+          value={JSON.stringify(mutations, null, 2)}
           onChange={() => {}}
         />
       )}
@@ -92,7 +107,6 @@ const Case = styled.div`
   border: none;
   border-radius: 0.25rem;
   padding: 0.5rem 1rem;
-  cursor: pointer;
   font-size: 1rem;
 `
 const CaseWrapper = styled.div`
@@ -102,4 +116,5 @@ const CaseWrapper = styled.div`
     margin-right: 1rem;
   }
 `
+
 export default Permutation

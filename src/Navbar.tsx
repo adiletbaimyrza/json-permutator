@@ -5,22 +5,29 @@ const Navbar: React.FC<{
   setIsPayloadVisible: React.Dispatch<React.SetStateAction<boolean>>
   isFieldsVisible: boolean
   setIsFieldsVisible: React.Dispatch<React.SetStateAction<boolean>>
+  isMutationBaseVisible: boolean
+  setIsMutationBaseVisible: React.Dispatch<React.SetStateAction<boolean>>
   handleGenerate: () => void
 }> = ({
   isPayloadVisible,
   setIsPayloadVisible,
   isFieldsVisible,
   setIsFieldsVisible,
+  isMutationBaseVisible,
+  setIsMutationBaseVisible,
   handleGenerate,
 }) => {
   return (
     <Nav>
-      <MainHeading>JSON Permutator</MainHeading>
+      <MainHeading>Payload Permutator</MainHeading>
       <Button onClick={() => setIsPayloadVisible(!isPayloadVisible)}>
         {isPayloadVisible ? 'Hide Payload' : 'Show Payload'}
       </Button>
       <Button onClick={() => setIsFieldsVisible(!isFieldsVisible)}>
         {isFieldsVisible ? 'Hide Fields' : 'Show Fields'}
+      </Button>
+      <Button onClick={() => setIsMutationBaseVisible(!isMutationBaseVisible)}>
+        {isMutationBaseVisible ? 'Hide Mutation Base' : 'Show Mutation Base'}
       </Button>
       <Button onClick={handleGenerate}>Generate Permutations</Button>
     </Nav>
@@ -38,7 +45,7 @@ const Nav = styled.nav`
   border-radius: 0.25rem;
   z-index: 10;
 
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); /* Bigger shadow */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 
   & > *:not(:last-child) {
     margin-right: 1rem;
